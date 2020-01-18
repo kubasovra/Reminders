@@ -1,0 +1,70 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+@using Microsoft.AspNetCore.Http
+@model IndexViewModel
+<head>
+    <script type="text/javascript" src="~\Scripts\Reminders.js"></script>
+</head>
+<body>
+
+    <div class="text-center">
+        <h1 class="display-4">Welcome to the "Reminders App V0.00001!"</h1>
+        <h2>Your ID is @Model.UserId</h2>
+    </div>
+    @{
+        if (Model.reminders != null)
+        {
+            foreach (RemindersApp.DBModels.Reminder reminder in Model.reminders)
+            {
+                <div><text>@reminder.Title</text></div>
+                <div><text>@reminder.Body</text></div>
+                <div><text>@reminder.Image</text></div>
+                <div><text>@reminder.ShowTime.Hour:@reminder.ShowTime.Minute @reminder.ShowTime.Day.@reminder.ShowTime.Month.@reminder.ShowTime.Year</text></div>
+                <form id="deleteReminderForm" asp-controller="Home" asp-action="DeleteReminder">
+                    <input type="hidden" name="reminderId" value=@reminder.Id/>
+                    <input type="submit" id="submit" value="Delete"/>
+                </form>
+            }
+        }
+    }
+    <form id="newReminderForm" asp-controller="Home" asp-action="AddReminder">
+        <h2>New task</h2>
+        <div><label for="title">Task title:</label><input type="text" name="title" required></div>
+        <div><label for="body">Task text:</label><input type="text" name="body"></div>
+        <div><label for="image_url">Image URL:</label><input type="text" name="image_url"></div>
+        <div><label for="deadline_hours">Hours (hh):</label><input type="number" name="deadline_hours" required></div>
+        <div><label for="deadline_minutes">Mins (mm):</label><input type="number" name="deadline_minutes" required></div>
+        <div>
+            <label for="deadline_day">Day:</label>
+            <select name="deadline_day" required>
+                @for (int i = 1; i <= 31; i++)
+                {
+                    <option value=@Convert.ToString(i)>@i</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label for="deadline_month">Month:</label>
+            <select name="deadline_month" required>
+                @for (int i = 1; i <= 12; i++)
+                {
+                    <option value=@Convert.ToString(i)>@i</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <label for="deadline_year">Year:</label>
+            <select name="deadline_year" required>
+                @for (int i = 2020; i <= 2030; i++)
+                {
+                    <option value=@Convert.ToString(i)>@i</option>
+                }
+            </select>
+        </div>
+        <div><input type="submit" id="submit" value="Add Task"></div>
+        <div></div>
+    </form>
+</body>
