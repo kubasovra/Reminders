@@ -1,13 +1,12 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json
 @model IndexViewModel
 <head>
-    <script type="text/javascript" src="~\Scripts\Reminders.js"></script>
+
 </head>
 <body>
-
     <div class="text-center">
         <h1 class="display-4">Welcome to the "Reminders App V0.00001!"</h1>
         <h2>Your ID is @Model.UserId</h2>
@@ -22,8 +21,8 @@
                 <div><text>@reminder.Image</text></div>
                 <div><text>@reminder.ShowTime.Hour:@reminder.ShowTime.Minute @reminder.ShowTime.Day.@reminder.ShowTime.Month.@reminder.ShowTime.Year</text></div>
                 <form id="deleteReminderForm" asp-controller="Home" asp-action="DeleteReminder">
-                    <input type="hidden" name="reminderId" value=@reminder.Id/>
-                    <input type="submit" id="submit" value="Delete"/>
+                    <input type="hidden" name="reminderId" value=@reminder.Id />
+                    <input type="submit" id="submit" value="Delete" />
                 </form>
             }
         }
@@ -65,6 +64,20 @@
             </select>
         </div>
         <div><input type="submit" id="submit" value="Add Task"></div>
-        <div></div>
     </form>
+    <script type="text/javascript">
+
+        let timerId = setInterval(checkDeadlines, 2000);
+
+        var Reminders = @Html.Raw(@JsonConvert.SerializeObject(Model.reminders));
+        var counter = 0;
+
+        checkDeadlines(Reminders);
+        function checkDeadlines(arr)
+        {
+            arr.forEach(function(item, i, arr) {
+                alert( i + ": " + item.ShowTime);
+            });
+        }
+    </script>
 </body>

@@ -14,5 +14,6 @@ namespace RemindersApp.DBModels
         public string Body { get; set; }
         public string Title { get; set; }
         public DateTime ShowTime { get; set; }
+        public bool Elapsed { get; set; }
     }
 }

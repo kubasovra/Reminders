@@ -48,7 +48,8 @@ namespace RemindersApp.Controllers
                 Image = image_url,
                 Title = title,
                 ShowTime = new DateTime(deadline_year, deadline_month, deadline_day, deadline_hours, deadline_minutes, 0),
-                UserId = HttpContext.Session.GetString("UserId")
+                UserId = HttpContext.Session.GetString("UserId"),
+                Elapsed = false
             };
             _context.Add(newReminder);
             _context.SaveChanges();
