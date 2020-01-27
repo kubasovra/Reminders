@@ -62,6 +62,12 @@ namespace RemindersApp.Controllers
         {
             IndexViewModel indexViewModel = new IndexViewModel();
 
+            Reminder remToDelete = _context.Reminders.FirstOrDefault(rm => rm.Id == Convert.ToInt32(reminderId));
+            if (remToDelete != null)
+            {
+                _context.Reminders.Remove(remToDelete);
+                _context.SaveChanges();
+            }
 
             indexViewModel.reminders = _context.Reminders.Where(r => r.UserId == HttpContext.Session.GetString("UserId")).ToList();
             indexViewModel.UserId = HttpContext.Session.GetString("UserId");

@@ -20,10 +20,7 @@
                 <div><text>@reminder.Body</text></div>
                 <div><text>@reminder.Image</text></div>
                 <div><text>@reminder.ShowTime.Hour:@reminder.ShowTime.Minute @reminder.ShowTime.Day.@reminder.ShowTime.Month.@reminder.ShowTime.Year</text></div>
-                <form id="deleteReminderForm" asp-controller="Home" asp-action="DeleteReminder">
-                    <input type="hidden" name="reminderId" value=@reminder.Id />
-                    <input type="submit" id="submit" value="Delete" />
-                </form>
+                <input type="button" onclick="deleteReminder(@reminder.Id)" value="Delete">
             }
         }
     }
@@ -65,19 +62,34 @@
         </div>
         <div><input type="submit" id="submit" value="Add Task"></div>
     </form>
+    <form name="deleteForm" asp-controller="Home" asp-action="DeleteReminder">
+        <input type="hidden" name="reminderId"/> 
+    </form>
     <script type="text/javascript">
-
-        let timerId = setInterval(checkDeadlines, 2000);
-
         var Reminders = @Html.Raw(@JsonConvert.SerializeObject(Model.reminders));
         var counter = 0;
 
-        checkDeadlines(Reminders);
-        function checkDeadlines(arr)
-        {
-            arr.forEach(function(item, i, arr) {
-                alert( i + ": " + item.ShowTime);
-            });
+        let timer = setInterval(checkDeadlines, 2000, Reminders);
+
+        function checkDeadlines(arr) {
+            var nowDate = new Date();
+            if (arr != null) {
+                arr.forEach(function (item, i, arr) {
+                    var remDate = new Date(item.ShowTime);
+                    if (nowDate >= remDate && !item.Elapsed) {
+                        let notification = new Notification(item.Title, { body: item.Body });
+                        item.Elapsed = true;
+                        deleteReminder(item.Id);
+                    }
+                });
+            }
+            
+        }
+
+        function deleteReminder(id) {
+            var deleteForm = document.forms.deleteForm;
+            deleteForm.elements.reminderId.value = id;
+            deleteForm.submit();
         }
     </script>
 </body>
