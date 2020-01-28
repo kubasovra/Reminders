@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -24,8 +25,10 @@ namespace RemindersApp.Controllers
         public IActionResult Index()
         {
             IndexViewModel indexViewModel = new IndexViewModel();
-            string UserId = HttpContext.Session.GetString("UserId");
+            string UserId = Request.Cookies["UserId"];
             indexViewModel.UserId = UserId;
+
+            //If User is unidentified, creates a new one with a random ID and saves it in cookies. Expires in one year
             if (UserId == null)
             {
                 Random rnd = new Random();
@@ -33,31 +36,37 @@ namespace RemindersApp.Controllers
                 byte[] buffer = new byte[20];
                 rnd.NextBytes(buffer);
                 NewUserId = Encoding.UTF8.GetString(buffer);
-                HttpContext.Session.SetString("UserId", NewUserId);
+                CookieOptions cookieOptions = new CookieOptions()
+                {
+                    Expires = DateTime.Now.AddYears(1)
+                };
+                Response.Cookies.Append("UserId", NewUserId, cookieOptions);
                 indexViewModel.UserId = NewUserId;
             }
+
+            indexViewModel.reminders = _context.Reminders.Where(r => r.UserId == Request.Cookies["UserId"]).ToList();
+            indexViewModel.UserId = Request.Cookies["UserId"];
             return View(indexViewModel);
         }
 
-        public IActionResult AddReminder(string image_url, string body, string title, int deadline_hours, int deadline_minutes, int deadline_day, int deadline_month, int deadline_year)
+        //Creates a new reminder and adds it to the DB
+        public IActionResult AddReminder(string deadline, string body, string title)
         {
             IndexViewModel indexViewModel = new IndexViewModel();
             Reminder newReminder = new Reminder()
             {
                 Body = body,
-                Image = image_url,
                 Title = title,
-                ShowTime = new DateTime(deadline_year, deadline_month, deadline_day, deadline_hours, deadline_minutes, 0),
-                UserId = HttpContext.Session.GetString("UserId"),
+                ShowTime = Convert.ToDateTime(deadline),
+                UserId = Request.Cookies["UserId"],
                 Elapsed = false
             };
             _context.Add(newReminder);
             _context.SaveChanges();
-            indexViewModel.reminders = _context.Reminders.Where(r => r.UserId == HttpContext.Session.GetString("UserId")).ToList();
-            indexViewModel.UserId = HttpContext.Session.GetString("UserId");
-            return View("Index", indexViewModel);
+            return RedirectToAction("Index");
         }
 
+        //Removes a reminder from the DB
         public IActionResult DeleteReminder(string reminderId)
         {
             IndexViewModel indexViewModel = new IndexViewModel();
@@ -69,20 +78,7 @@ namespace RemindersApp.Controllers
                 _context.SaveChanges();
             }
 
-            indexViewModel.reminders = _context.Reminders.Where(r => r.UserId == HttpContext.Session.GetString("UserId")).ToList();
-            indexViewModel.UserId = HttpContext.Session.GetString("UserId");
-            return View("Index", indexViewModel);
-        }
-
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return RedirectToAction("Index");
         }
     }
 }

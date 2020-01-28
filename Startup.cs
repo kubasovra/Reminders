@@ -27,18 +27,8 @@ namespace RemindersApp
         {
             services.AddDbContext<DBModels.AppContext>(options => options.UseInMemoryDatabase(databaseName: "RemindersDB"));
             services.AddControllersWithViews();
-
             services.AddDistributedMemoryCache();
 
-            services.AddSession(options =>
-            {
-                // Set a short timeout for easy testing.
-                options.IdleTimeout = TimeSpan.FromSeconds(120);
-                options.Cookie.HttpOnly = true;
-                // Make the session cookie essential
-                options.Cookie.IsEssential = true;
-                options.Cookie.Name = "CurrSession";
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -57,8 +47,6 @@ namespace RemindersApp
             app.UseRouting();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
-            
-            app.UseSession();
 
             app.UseEndpoints(endpoints =>
             {

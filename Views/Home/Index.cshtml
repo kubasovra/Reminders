@@ -3,73 +3,69 @@
 }
 @using Newtonsoft.Json
 @model IndexViewModel
-<head>
-
-</head>
 <body>
     <div class="text-center">
-        <h1 class="display-4">Welcome to the "Reminders App V0.00001!"</h1>
-        <h2>Your ID is @Model.UserId</h2>
+        <h1 class="display-4">Hello, World!</h1>
     </div>
-    @{
-        if (Model.reminders != null)
-        {
-            foreach (RemindersApp.DBModels.Reminder reminder in Model.reminders)
+    <table class="table table-responsive-md">
+        @{
+            if (Model.reminders != null && Model.reminders.Count != 0)
             {
-                <div><text>@reminder.Title</text></div>
-                <div><text>@reminder.Body</text></div>
-                <div><text>@reminder.Image</text></div>
-                <div><text>@reminder.ShowTime.Hour:@reminder.ShowTime.Minute @reminder.ShowTime.Day.@reminder.ShowTime.Month.@reminder.ShowTime.Year</text></div>
-                <input type="button" onclick="deleteReminder(@reminder.Id)" value="Delete">
+                <thead>
+                    <tr>
+                        <td style="font-weight: 700">Title</td>
+                        <td style="font-weight: 700">Text</td>
+                        <td style="font-weight: 700">Time</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (RemindersApp.DBModels.Reminder reminder in Model.reminders)
+                    {
+                    <tr class="d-lg-table-row">
+                        <td>@reminder.Title</td>
+                        <td>@reminder.Body</td>
+                        <td>@reminder.ShowTime.Hour:@reminder.ShowTime.Minute @reminder.ShowTime.Day.@reminder.ShowTime.Month.@reminder.ShowTime.Year</td>
+                        <td><input class="btn btn-sm btn-danger" type="button" onclick="deleteReminder(@reminder.Id)" value="Delete"></td>
+                    </tr>
+                    }
+                </tbody>
             }
         }
-    }
-    <form id="newReminderForm" asp-controller="Home" asp-action="AddReminder">
+    </table>
+    <form name="newReminderForm" asp-controller="Home" asp-action="AddReminder">
         <h2>New task</h2>
-        <div><label for="title">Task title:</label><input type="text" name="title" required></div>
-        <div><label for="body">Task text:</label><input type="text" name="body"></div>
-        <div><label for="image_url">Image URL:</label><input type="text" name="image_url"></div>
-        <div><label for="deadline_hours">Hours (hh):</label><input type="number" name="deadline_hours" required></div>
-        <div><label for="deadline_minutes">Mins (mm):</label><input type="number" name="deadline_minutes" required></div>
-        <div>
-            <label for="deadline_day">Day:</label>
-            <select name="deadline_day" required>
-                @for (int i = 1; i <= 31; i++)
-                {
-                    <option value=@Convert.ToString(i)>@i</option>
-                }
-            </select>
+        <div class="col-md-3 border">
+            <div>
+                <label for="title">Task title: </label>
+                <input class="form-control" type="text" name="title" maxlength="25" required>
+            </div>
+            <div>
+                <label for="body">Task text: </label>
+                <input class="form-control" type="text" name="body" maxlength="80">
+            </div>
+            <div>
+                <label for="deadline_minutes">Deadline: </label>
+                <input class="form-control" type="datetime-local" name="deadline" required>
+            </div>
+            <div>
+                <input style="margin-top: 10px; margin-bottom: 10px" class="btn btn-sm btn-primary" type="submit" id="submit" value="Add Task">
+            </div>
         </div>
-
-        <div>
-            <label for="deadline_month">Month:</label>
-            <select name="deadline_month" required>
-                @for (int i = 1; i <= 12; i++)
-                {
-                    <option value=@Convert.ToString(i)>@i</option>
-                }
-            </select>
-        </div>
-
-        <div>
-            <label for="deadline_year">Year:</label>
-            <select name="deadline_year" required>
-                @for (int i = 2020; i <= 2030; i++)
-                {
-                    <option value=@Convert.ToString(i)>@i</option>
-                }
-            </select>
-        </div>
-        <div><input type="submit" id="submit" value="Add Task"></div>
     </form>
+
+    
     <form name="deleteForm" asp-controller="Home" asp-action="DeleteReminder">
         <input type="hidden" name="reminderId"/> 
     </form>
+
     <script type="text/javascript">
+        askNotificationPermission();
+
         var Reminders = @Html.Raw(@JsonConvert.SerializeObject(Model.reminders));
         var counter = 0;
 
-        let timer = setInterval(checkDeadlines, 2000, Reminders);
+        //Checks the deadlines every 5 seconds
+        let timer = setInterval(checkDeadlines, 5000, Reminders);
 
         function checkDeadlines(arr) {
             var nowDate = new Date();
@@ -83,13 +79,20 @@
                     }
                 });
             }
-            
         }
 
+        //Sends a form with ID of an elapsed reminder
         function deleteReminder(id) {
             var deleteForm = document.forms.deleteForm;
             deleteForm.elements.reminderId.value = id;
             deleteForm.submit();
+        }
+
+        //Checks the notification permission's status and, if denied, asks for it
+        function askNotificationPermission() {
+            if (Notification.permission === 'denied' || Notification.permission === 'default') {
+                Notification.requestPermission();
+            } 
         }
     </script>
 </body>

@@ -12,7 +12,7 @@ namespace RemindersApp.DBModels
         public AppContext(DbContextOptions<AppContext> options)
             : base(options)
         {
-            Database.EnsureCreated();   // создаем базу данных при первом обращении
+            Database.EnsureCreated();
         }
     }
 }
